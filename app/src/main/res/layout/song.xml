@@ -3,13 +3,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:onClick="songPicked"
+    android:padding="5dp"
 >
     <TextView
         android:id="@+id/song_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#FAFAFA"
+        android:textColor="#212121"
         android:textSize="20sp"
         android:textStyle="bold"
     />
@@ -18,7 +20,7 @@
         android:id="@+id/song_artist"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#EEEEEE"
+        android:textColor="#212121"
         android:textSize="16sp"
     />
 </LinearLayout>
