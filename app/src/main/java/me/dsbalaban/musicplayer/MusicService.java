@@ -1,6 +1,7 @@
 package me.dsbalaban.musicplayer;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import android.app.Service;
 import android.content.Intent;
@@ -15,6 +16,10 @@ import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.util.Log;
 
+// Notification
+import android.app.Notification;
+import android.app.PendingIntent;
+
 public class MusicService extends Service implements
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
         MediaPlayer.OnCompletionListener    {
@@ -24,11 +29,18 @@ public class MusicService extends Service implements
     private int songPos;
     private final IBinder musicBind = new MusicBinder();
 
+    private String songTitle = "";
+    private static final int NOTIFY_ID = 1;
+
+    private boolean shuffle = false;
+    private Random rand;
+
     public void onCreate() {
         super.onCreate();
 
-        this.songPos = 0;
-        this.player = new MediaPlayer();
+        songPos = 0;
+        player = new MediaPlayer();
+        rand = new Random();
 
         initMusicPlayer();
     }
@@ -66,17 +78,39 @@ public class MusicService extends Service implements
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-
+        if (player.getCurrentPosition() > 0) {
+            mp.reset();
+            playNext();
+        }
     }
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
+        mp.reset();
         return false;
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
         mp.start();
+
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification.Builder builder = new Notification.Builder(this);
+
+        builder.setContentIntent(pendingIntent)
+                .setSmallIcon(R.drawable.play)
+                .setTicker(songTitle)
+                .setOngoing(true)
+                .setContentTitle("Playing")
+                .setContentText(songTitle);
+
+        Notification notification = builder.build();
+
+        startForeground(NOTIFY_ID, notification);
     }
 
     public void setSong(int songIndex) {
@@ -87,6 +121,8 @@ public class MusicService extends Service implements
         player.reset();
 
         Song playSong = songs.get(songPos);
+        songTitle = playSong.getTitle();
+
         long currentSong = playSong.getID();
 
         Uri trackUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, currentSong);
@@ -98,5 +134,68 @@ public class MusicService extends Service implements
         }
 
         player.prepareAsync();
+    }
+
+    public int getPosition() {
+        return player.getCurrentPosition();
+    }
+
+    public int getDuration() {
+        return player.getDuration();
+    }
+
+    public boolean isPlaying() {
+        return player.isPlaying();
+    }
+
+    public void pausePlayer() {
+        player.pause();
+    }
+
+    public void seek(int position) {
+        player.seekTo(position);
+    }
+
+    public void start() {
+        player.start();
+    }
+
+    public void playPrevious() {
+        songPos--;
+
+        if (songPos < 0) {
+            songPos = songs.size() - 1;
+        }
+
+        playSong();
+    }
+
+    public void playNext() {
+        if (shuffle) {
+            int newSong = songPos;
+
+            while (newSong == songPos) {
+                newSong = rand.nextInt(songs.size());
+            }
+
+            songPos = newSong;
+        } else {
+            songPos++;
+
+            if (songPos == songs.size()) {
+                songPos = 0;
+            }
+        }
+
+        playSong();
+    }
+
+    @Override
+    public void onDestroy() {
+        stopForeground(true);
+    }
+
+    public void setShuffle() {
+        shuffle = !shuffle;
     }
 }
