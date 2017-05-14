@@ -7,10 +7,8 @@ import java.util.Comparator;
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
-import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.net.Uri;
 import android.content.ContentResolver;
 import android.database.Cursor;
@@ -26,10 +24,11 @@ import android.content.ServiceConnection;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.MediaController;
+import android.widget.ViewSwitcher;
 
 import me.dsbalaban.musicplayer.MusicService.MusicBinder;
 
-public class MainActivity extends Activity implements MediaController.MediaPlayerControl, MediaPlayer.OnPreparedListener {
+public class MainActivity extends Activity implements MediaController.MediaPlayerControl {
     private ArrayList<Song> songList;
     private ListView songView;
     private MusicService musicService;
@@ -84,10 +83,13 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
     private ServiceConnection musicConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            MusicBinder binder = (MusicBinder)service;
+            MusicBinder binder = (MusicBinder) service;
 
             musicService = binder.getService();
+
             musicService.setList(songList);
+            musicService.setActivity(MainActivity.this);
+
             musicBound = true;
         }
 
@@ -118,9 +120,14 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
     }
 
     public void songPicked(View view) {
-        musicService.setSong(Integer.parseInt(view.getTag().toString()));
+        int songIndex = Integer.parseInt(view.getTag().toString());
+
+        musicService.setSong(songIndex);
         handlePlaybackPaused();
         musicService.playSong();
+
+        ViewSwitcher viewSwitcher = (ViewSwitcher) findViewById(R.id.main_view_switcher);
+        viewSwitcher.showNext();
     }
 
     @Override
@@ -176,22 +183,6 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
         musicController.setMediaPlayer(this);
         musicController.setAnchorView(findViewById(R.id.song_list));
         musicController.setEnabled(true);
-    }
-
-    // Well, this did nothing
-    // Woohoo
-    // Where's the damn controller?
-    @Override
-    public void onPrepared(MediaPlayer mp) {
-        setController();
-
-        Handler handler = new Handler();
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                musicController.show();
-            }
-        });
     }
 
     @Override

@@ -3,13 +3,13 @@ package me.dsbalaban.musicplayer;
 import java.util.ArrayList;
 import java.util.Random;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.IBinder;
 import android.content.ContentUris;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.PowerManager;
@@ -19,6 +19,7 @@ import android.util.Log;
 // Notification
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.widget.TextView;
 
 public class MusicService extends Service implements
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
@@ -28,6 +29,7 @@ public class MusicService extends Service implements
     private ArrayList<Song> songs;
     private int songPos;
     private final IBinder musicBind = new MusicBinder();
+    private Activity activity;
 
     private String songTitle = "";
     private static final int NOTIFY_ID = 1;
@@ -56,6 +58,9 @@ public class MusicService extends Service implements
 
     public void setList(ArrayList<Song> songs) {
         this.songs = songs;
+    }
+    public void setActivity(Activity a) {
+        this.activity = a;
     }
 
     public class MusicBinder extends Binder {
@@ -129,6 +134,9 @@ public class MusicService extends Service implements
 
         try {
             player.setDataSource(getApplicationContext(), trackUri);
+
+            TextView t = (TextView) activity.findViewById(R.id.song_details_title);
+            t.setText(songTitle);
         } catch (Exception e) {
             Log.e("MUSIC SERVICE", "Error setting data source", e);
         }
