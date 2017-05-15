@@ -16,6 +16,7 @@
         android:layout_weight="0.75"
         android:contentDescription="@string/song_album_picture"
         android:src="@drawable/headphones"
+        android:layout_gravity="center_vertical"
     />
 
     <TextView
@@ -23,10 +24,11 @@
         android:layout_width="match_parent"
         android:layout_weight="0.1"
         android:gravity="center"
-        android:textSize="16sp"
+        android:textSize="24sp"
         android:ellipsize="end"
         android:maxLines="1"
         android:id="@+id/song_details_title"
+        android:textColor="#000000"
     />
 
     <View

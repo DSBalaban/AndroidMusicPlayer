@@ -38,7 +38,6 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
     private boolean musicBound = false;
 
     private MusicController musicController;
-    private Handler mHandler = new Handler();
     private boolean paused = false;
     private boolean playbackPaused = false;
 
@@ -186,7 +185,8 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
 
         musicController.setMediaPlayer(this);
         musicController.setAnchorView(findViewById(R.id.song_details_layout));
-        musicController.setEnabled(true);
+
+
     }
 
     @Override

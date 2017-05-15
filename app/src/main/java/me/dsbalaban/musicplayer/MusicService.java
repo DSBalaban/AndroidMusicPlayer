@@ -128,6 +128,8 @@ public class MusicService extends Service implements
         Song playSong = songs.get(songPos);
         songTitle = playSong.getTitle();
 
+        Log.d("Song position", Integer.toString(songPos));
+
         long currentSong = playSong.getID();
 
         Uri trackUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, currentSong);
