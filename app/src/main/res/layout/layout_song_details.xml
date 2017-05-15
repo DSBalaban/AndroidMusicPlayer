@@ -4,6 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/song_details_layout"
 >
 
     <ImageView
@@ -32,6 +33,9 @@
         android:layout_height="0dp"
         android:layout_width="match_parent"
         android:layout_weight="0.15"
+        android:id="@+id/song_details_controller"
+        android:gravity="center"
+        android:weightSum="1"
     />
 
 </LinearLayout>

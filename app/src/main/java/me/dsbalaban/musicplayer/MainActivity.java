@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.net.Uri;
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.widget.ListView;
@@ -36,6 +38,7 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
     private boolean musicBound = false;
 
     private MusicController musicController;
+    private Handler mHandler = new Handler();
     private boolean paused = false;
     private boolean playbackPaused = false;
 
@@ -128,6 +131,7 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
 
         ViewSwitcher viewSwitcher = (ViewSwitcher) findViewById(R.id.main_view_switcher);
         viewSwitcher.showNext();
+        musicController.show(0);
     }
 
     @Override
@@ -181,12 +185,13 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
         });
 
         musicController.setMediaPlayer(this);
-        musicController.setAnchorView(findViewById(R.id.song_list));
+        musicController.setAnchorView(findViewById(R.id.song_details_layout));
         musicController.setEnabled(true);
     }
 
     @Override
     public void start() {
+        playbackPaused = false;
         musicService.start();
     }
 

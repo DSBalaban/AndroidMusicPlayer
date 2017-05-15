@@ -2,5 +2,9 @@
     <string name="app_name">MusicPlayer</string>
     <string name="shuffle_icon_name">Shuffle</string>
     <string name="end_icon_name">End</string>
+    <string name="play_icon_name">Play</string>
+    <string name="next_icon_name">Next</string>
+    <string name="prev_icon_name">Previous</string>
     <string name="song_album_picture">Song Album Picture</string>
+    <string name="controller_button">Controller Button</string>
 </resources>
