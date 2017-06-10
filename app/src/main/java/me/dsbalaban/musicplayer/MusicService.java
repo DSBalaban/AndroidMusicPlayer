@@ -139,11 +139,11 @@ public class MusicService extends Service implements
 
             TextView t = (TextView) activity.findViewById(R.id.song_details_title);
             t.setText(songTitle);
+
+            player.prepare();
         } catch (Exception e) {
             Log.e("MUSIC SERVICE", "Error setting data source", e);
         }
-
-        player.prepareAsync();
     }
 
     public int getPosition() {
