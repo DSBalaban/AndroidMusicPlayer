@@ -122,8 +122,12 @@ public class MusicService extends Service implements
     public void setSong(int songIndex) {
         this.songPos = songIndex;
     }
-    public void setSongsList(ArrayList<Song> replacement) {
-        this.songs = replacement;
+    public void setSongsList(ArrayList<Song> list) {
+        if (this.songs.size() > list.size()) {
+            songPos = list.size() - 1;
+        }
+
+        this.songs = list;
     }
 
     public void playSong() {

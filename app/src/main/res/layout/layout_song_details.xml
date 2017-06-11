@@ -41,7 +41,6 @@
             android:id="@+id/favorite_unfavorite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
             android:background="@drawable/toggle_favorite"
             android:checked="false"
             android:contentDescription="@string/action_favorite_song"

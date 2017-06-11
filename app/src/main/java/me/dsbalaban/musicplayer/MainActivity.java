@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.net.Uri;
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.widget.ListView;
@@ -32,7 +33,6 @@ import me.dsbalaban.musicplayer.MusicService.MusicBinder;
 
 public class MainActivity extends Activity implements MediaController.MediaPlayerControl {
     private ArrayList<Song> songList;
-    private ArrayList<Long> favoritesIds;
     private ArrayList<Song> favoriteSongs;
     private ListView songView;
     private MusicService musicService;
@@ -47,6 +47,8 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
 
     private boolean showingFavorites = false;
     private boolean shuffling = false;
+
+    private Menu menu = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +95,9 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
+
+        this.menu = menu;
+
         return true;
     }
 
@@ -120,7 +125,7 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
         Uri musicUri = Audio.Media.EXTERNAL_CONTENT_URI;
         Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
 
-        favoritesIds = dbHelper.getFavoritesIds();
+        ArrayList<Long> favoritesIds = dbHelper.getFavoritesIds();
         favoriteSongs = new ArrayList<>();
 
         if (musicCursor != null && musicCursor.moveToFirst()) {
@@ -163,7 +168,14 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
                 this.shuffleAction(item);
                 break;
             case R.id.action_end:
-                this.exitAction();
+                ViewSwitcher viewSwitcher = (ViewSwitcher) findViewById(R.id.main_view_switcher);
+
+                if (viewSwitcher.getDisplayedChild() == 0) {
+                    this.exitAction();
+                } else {
+                    this.backAction(viewSwitcher, item);
+                }
+
                 break;
             case R.id.action_show_favorites:
                 this.showFavorites(item);
@@ -171,6 +183,11 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
     }
 
     private void shuffleAction(MenuItem item) {
@@ -190,15 +207,22 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
         System.exit(0);
     }
 
+    private void backAction(ViewSwitcher viewSwitcher, MenuItem item) {
+        viewSwitcher.setDisplayedChild(0);
+        item.setIcon(getResources().getDrawable(R.drawable.end, this.getTheme()));
+    }
+
     private void showFavorites(MenuItem item) {
         showingFavorites = !showingFavorites;
         item.setChecked(showingFavorites);
 
         if (showingFavorites) {
             refreshSongListView(favoriteSongs);
+            musicService.setSongsList(favoriteSongs);
             item.setIcon(getResources().getDrawable(R.drawable.ic_favorite_border_becca_24dp, this.getTheme()));
         } else {
             refreshSongListView(songList);
+            musicService.setSongsList(songList);
             item.setIcon(getResources().getDrawable(R.drawable.ic_favorite_border_black_24dp, this.getTheme()));
         }
     }
@@ -349,6 +373,8 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
 
         ViewSwitcher viewSwitcher = (ViewSwitcher) findViewById(R.id.main_view_switcher);
         viewSwitcher.showNext();
+
+        this.menu.getItem(2).setIcon(getResources().getDrawable(R.drawable.ic_arrow_back_black_24dp, this.getTheme()));
 
         musicController.show(0);
     }
