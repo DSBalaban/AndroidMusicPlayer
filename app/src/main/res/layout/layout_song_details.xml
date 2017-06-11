@@ -45,10 +45,9 @@
             android:background="@drawable/toggle_favorite"
             android:checked="false"
             android:contentDescription="@string/action_favorite_song"
-            android:textOff=""
-            android:textOn=""
             android:onClick="toggleFavorite"
-        />
+            android:textOff=""
+            android:textOn="" />
     </RelativeLayout>
 
     <View

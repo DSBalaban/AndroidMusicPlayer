@@ -32,7 +32,8 @@ import me.dsbalaban.musicplayer.MusicService.MusicBinder;
 
 public class MainActivity extends Activity implements MediaController.MediaPlayerControl {
     private ArrayList<Song> songList;
-    private ArrayList<Long> favorites;
+    private ArrayList<Long> favoritesIds;
+    private ArrayList<Song> favoriteSongs;
     private ListView songView;
     private MusicService musicService;
     private Intent playIntent;
@@ -43,6 +44,9 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
     private MusicController musicController;
     private boolean paused = false;
     private boolean playbackPaused = false;
+
+    private boolean showingFavorites = false;
+    private boolean shuffling = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,16 +73,20 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
 
         getSongList();
 
-        Collections.sort(songList, new Comparator<Song>() {
+        refreshSongListView(songList);
+
+        setController();
+    }
+
+    private void refreshSongListView(ArrayList<Song> list) {
+        Collections.sort(list, new Comparator<Song>() {
             public int compare(Song a, Song b) {
                 return a.getTitle().compareTo(b.getTitle());
             }
         });
 
-        SongAdapter songAdapter = new SongAdapter(this, songList);
+        SongAdapter songAdapter = new SongAdapter(this, list);
         songView.setAdapter(songAdapter);
-
-        setController();
     }
 
     @Override
@@ -112,7 +120,8 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
         Uri musicUri = Audio.Media.EXTERNAL_CONTENT_URI;
         Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
 
-        favorites = dbHelper.getFavoritesIds();
+        favoritesIds = dbHelper.getFavoritesIds();
+        favoriteSongs = new ArrayList<>();
 
         if (musicCursor != null && musicCursor.moveToFirst()) {
             int titleColumn = musicCursor.getColumnIndex(Audio.Media.TITLE);
@@ -126,8 +135,9 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
 
                 Song songToAdd = new Song(currentId, currentTitle, currentArtist);
 
-                if (favorites.contains(currentId)) {
+                if (favoritesIds.contains(currentId)) {
                     songToAdd.toggleFavorite();
+                    favoriteSongs.add(songToAdd);
                 }
 
                 songList.add(songToAdd);
@@ -150,16 +160,47 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_shuffle:
-                musicService.setShuffle();
+                this.shuffleAction(item);
                 break;
             case R.id.action_end:
-                stopService(playIntent);
-                musicService = null;
-                System.exit(0);
+                this.exitAction();
+                break;
+            case R.id.action_show_favorites:
+                this.showFavorites(item);
                 break;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void shuffleAction(MenuItem item) {
+        shuffling = !shuffling;
+        musicService.toggleShuffle();
+
+        if (shuffling) {
+            item.setIcon(getResources().getDrawable(R.drawable.rand_becca, this.getTheme()));
+        } else {
+            item.setIcon(getResources().getDrawable(R.drawable.rand, this.getTheme()));
+        }
+    }
+
+    private void exitAction() {
+        stopService(playIntent);
+        musicService = null;
+        System.exit(0);
+    }
+
+    private void showFavorites(MenuItem item) {
+        showingFavorites = !showingFavorites;
+        item.setChecked(showingFavorites);
+
+        if (showingFavorites) {
+            refreshSongListView(favoriteSongs);
+            item.setIcon(getResources().getDrawable(R.drawable.ic_favorite_border_becca_24dp, this.getTheme()));
+        } else {
+            refreshSongListView(songList);
+            item.setIcon(getResources().getDrawable(R.drawable.ic_favorite_border_black_24dp, this.getTheme()));
+        }
     }
 
     @Override
@@ -323,11 +364,13 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
             String[] selectionArgs = { songId };
 
             db.delete(FavoritesContract.FavoritesEntry.TABLE_NAME, selection, selectionArgs);
+            favoriteSongs.remove(song);
         } else {
             ContentValues values = new ContentValues();
             values.put(FavoritesContract.FavoritesEntry.COLUMN_NAME_SONG_ID, song.getID());
 
             db.insert(FavoritesContract.FavoritesEntry.TABLE_NAME, null, values);
+            favoriteSongs.add(song);
         }
     }
 }

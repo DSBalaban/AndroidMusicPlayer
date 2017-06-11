@@ -122,6 +122,9 @@ public class MusicService extends Service implements
     public void setSong(int songIndex) {
         this.songPos = songIndex;
     }
+    public void setSongsList(ArrayList<Song> replacement) {
+        this.songs = replacement;
+    }
 
     public void playSong() {
         player.reset();
@@ -209,7 +212,7 @@ public class MusicService extends Service implements
         stopForeground(true);
     }
 
-    public void setShuffle() {
+    public void toggleShuffle() {
         shuffle = !shuffle;
     }
 

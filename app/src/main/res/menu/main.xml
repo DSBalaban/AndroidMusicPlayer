@@ -1,17 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/action_shuffle"
-        android:icon="@drawable/rand"
+        android:id="@+id/action_show_favorites"
+        android:icon="@drawable/ic_favorite_border_black_24dp"
         android:orderInCategory="1"
         android:showAsAction="ifRoom"
+        android:title="@string/display_favorites"
+        android:checkable="true"
+        android:checked="false"
+    />
+
+    <item
+        android:id="@+id/action_shuffle"
+        android:icon="@drawable/rand"
+        android:orderInCategory="2"
+        android:showAsAction="ifRoom"
         android:title="@string/shuffle_icon_name"
+        android:checkable="true"
+        android:checked="false"
     />
 
     <item
         android:id="@+id/action_end"
         android:icon="@drawable/end"
-        android:orderInCategory="2"
+        android:orderInCategory="3"
         android:showAsAction="always"
         android:title="@string/end_icon_name"
     />
