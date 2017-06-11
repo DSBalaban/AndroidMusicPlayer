@@ -6,14 +6,14 @@ import java.util.Comparator;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.net.Uri;
 import android.content.ContentResolver;
 import android.database.Cursor;
-import android.os.Handler;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.widget.ListView;
@@ -32,10 +32,13 @@ import me.dsbalaban.musicplayer.MusicService.MusicBinder;
 
 public class MainActivity extends Activity implements MediaController.MediaPlayerControl {
     private ArrayList<Song> songList;
+    private ArrayList<Long> favorites;
     private ListView songView;
     private MusicService musicService;
     private Intent playIntent;
     private boolean musicBound = false;
+    private DBHelper dbHelper = null;
+    private SQLiteDatabase db = null;
 
     private MusicController musicController;
     private boolean paused = false;
@@ -45,6 +48,9 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        dbHelper = DBHelper.getInstance(this);
+        db = dbHelper.getWritableDatabase();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -106,6 +112,8 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
         Uri musicUri = Audio.Media.EXTERNAL_CONTENT_URI;
         Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
 
+        favorites = dbHelper.getFavoritesIds();
+
         if (musicCursor != null && musicCursor.moveToFirst()) {
             int titleColumn = musicCursor.getColumnIndex(Audio.Media.TITLE);
             int idColumn = musicCursor.getColumnIndex(Audio.Media._ID);
@@ -116,21 +124,15 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
                 String currentTitle = musicCursor.getString(titleColumn);
                 String currentArtist = musicCursor.getString(artistColumn);
 
-                songList.add(new Song(currentId, currentTitle, currentArtist));
+                Song songToAdd = new Song(currentId, currentTitle, currentArtist);
+
+                if (favorites.contains(currentId)) {
+                    songToAdd.toggleFavorite();
+                }
+
+                songList.add(songToAdd);
             } while (musicCursor.moveToNext());
         }
-    }
-
-    public void songPicked(View view) {
-        int songIndex = Integer.parseInt(view.getTag().toString());
-
-        musicService.setSong(songIndex);
-        handlePlaybackPaused();
-        musicService.playSong();
-
-        ViewSwitcher viewSwitcher = (ViewSwitcher) findViewById(R.id.main_view_switcher);
-        viewSwitcher.showNext();
-        musicController.show(0);
     }
 
     @Override
@@ -185,8 +187,6 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
 
         musicController.setMediaPlayer(this);
         musicController.setAnchorView(findViewById(R.id.song_details_layout));
-
-
     }
 
     @Override
@@ -295,5 +295,39 @@ public class MainActivity extends Activity implements MediaController.MediaPlaye
         musicController.hide();
 
         super.onStop();
+    }
+
+    // UI Interaction Methods
+
+    public void songPicked(View view) {
+        int songIndex = Integer.parseInt(view.getTag().toString());
+
+        musicService.setSong(songIndex);
+        handlePlaybackPaused();
+        musicService.playSong();
+
+        ViewSwitcher viewSwitcher = (ViewSwitcher) findViewById(R.id.main_view_switcher);
+        viewSwitcher.showNext();
+
+        musicController.show(0);
+    }
+
+    public void toggleFavorite(View view) {
+        int songIndex = musicService.getSongPos();
+
+        Song song = songList.get(songIndex);
+
+        if (song.isFavorite()) {
+            String selection = FavoritesContract.FavoritesEntry.COLUMN_NAME_SONG_ID + " LIKE ?";
+            String songId = String.valueOf(song.getID());
+            String[] selectionArgs = { songId };
+
+            db.delete(FavoritesContract.FavoritesEntry.TABLE_NAME, selection, selectionArgs);
+        } else {
+            ContentValues values = new ContentValues();
+            values.put(FavoritesContract.FavoritesEntry.COLUMN_NAME_SONG_ID, song.getID());
+
+            db.insert(FavoritesContract.FavoritesEntry.TABLE_NAME, null, values);
+        }
     }
 }

@@ -7,4 +7,5 @@
     <string name="prev_icon_name">Previous</string>
     <string name="song_album_picture">Song Album Picture</string>
     <string name="controller_button">Controller Button</string>
+    <string name="action_favorite_song">Favorite Song</string>
 </resources>

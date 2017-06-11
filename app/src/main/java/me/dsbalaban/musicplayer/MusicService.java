@@ -20,6 +20,7 @@ import android.util.Log;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 public class MusicService extends Service implements
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
@@ -144,6 +145,9 @@ public class MusicService extends Service implements
         } catch (Exception e) {
             Log.e("MUSIC SERVICE", "Error setting data source", e);
         }
+
+        ToggleButton tb = (ToggleButton) activity.findViewById(R.id.favorite_unfavorite);
+        tb.setChecked(this.getSongFavoriteState());
     }
 
     public int getPosition() {
@@ -207,5 +211,15 @@ public class MusicService extends Service implements
 
     public void setShuffle() {
         shuffle = !shuffle;
+    }
+
+    public int getSongPos() {
+        return songPos;
+    }
+
+    public boolean getSongFavoriteState() {
+        Song s = songs.get(songPos);
+
+        return s.isFavorite();
     }
 }

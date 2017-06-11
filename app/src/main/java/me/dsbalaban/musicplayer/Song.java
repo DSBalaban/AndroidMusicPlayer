@@ -4,6 +4,7 @@ public class Song {
     private long id;
     private String title;
     private String artist;
+    private boolean favorite = false;
 
     public Song(long id, String title, String artist) {
         this.id = id;
@@ -21,5 +22,13 @@ public class Song {
 
     public String getArtist() {
         return this.artist;
+    }
+
+    public boolean isFavorite() {
+        return this.favorite;
+    }
+
+    public void toggleFavorite() {
+        this.favorite = !this.favorite;
     }
 }

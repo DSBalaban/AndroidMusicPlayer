@@ -6,14 +6,13 @@
     android:layout_height="match_parent"
     android:id="@+id/song_details_layout"
 >
-
     <ImageView
         android:id="@+id/song_album_image"
         android:layout_height="0dp"
         android:layout_width="match_parent"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        android:layout_weight="0.75"
+        android:layout_weight="0.65"
         android:contentDescription="@string/song_album_picture"
         android:src="@drawable/headphones"
         android:layout_gravity="center_vertical"
@@ -31,6 +30,27 @@
         android:textColor="#000000"
     />
 
+    <RelativeLayout
+        android:layout_height="0dp"
+        android:layout_weight="0.1"
+        android:layout_width="match_parent"
+        android:gravity="center"
+    >
+
+        <ToggleButton
+            android:id="@+id/favorite_unfavorite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/toggle_favorite"
+            android:checked="false"
+            android:contentDescription="@string/action_favorite_song"
+            android:textOff=""
+            android:textOn=""
+            android:onClick="toggleFavorite"
+        />
+    </RelativeLayout>
+
     <View
         android:layout_height="0dp"
         android:layout_width="match_parent"
@@ -39,5 +59,4 @@
         android:gravity="center"
         android:weightSum="1"
     />
-
 </LinearLayout>
